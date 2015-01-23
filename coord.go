@@ -82,7 +82,7 @@ func (z *Cart) Cross(a, b *Cart) *Cart {
 //
 // Units can be anything, but methods below work with radians.
 type Sphr struct {
-	Ra, Dec float64
+	RA, Dec float64
 }
 
 // slice types
@@ -94,8 +94,8 @@ type CartS []Cart
 // cartesian unit vector (X, Y, Z).  The receiver is returned.
 func (c *Cart) FromSphr(s *Sphr) *Cart {
 	t := math.Cos(s.Dec)
-	c.X = t * math.Cos(s.Ra)
-	c.Y = t * math.Sin(s.Ra)
+	c.X = t * math.Cos(s.RA)
+	c.Y = t * math.Sin(s.RA)
 	c.Z = math.Sin(s.Dec)
 	return c
 }
@@ -120,7 +120,7 @@ func (cp *CartS) FromSphrS(s SphrS) CartS {
 // FromCart cartesian vector to spherical coordinates.
 // The receiver is returned.
 func (s *Sphr) FromCart(c *Cart) *Sphr {
-	s.Ra = math.Mod(math.Atan2(c.Y, c.X)+twoPi, twoPi)
+	s.RA = math.Mod(math.Atan2(c.Y, c.X)+twoPi, twoPi)
 	s.Dec = math.Asin(c.Z)
 	return s
 }

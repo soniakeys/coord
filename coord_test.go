@@ -35,7 +35,7 @@ func ExampleCart_Dot() {
 
 func ExampleCart_FromSphr() {
 	c := new(coord.Cart)
-	s := &coord.Sphr{Ra: 0, Dec: 30 * math.Pi / 180}
+	s := &coord.Sphr{RA: 0, Dec: 30 * math.Pi / 180}
 	fmt.Printf("%+.3v\n", *c.FromSphr(s))
 	// Output:
 	// {X:0.866 Y:0 Z:0.5}
@@ -87,7 +87,7 @@ func ExampleCart_Sub() {
 func ExampleCartS_FromSphrS() {
 	s := coord.SphrS{
 		{},
-		{Ra: 30 * math.Pi / 180},
+		{RA: 30 * math.Pi / 180},
 		{Dec: 30 * math.Pi / 180},
 	}
 	for _, c := range new(coord.CartS).FromSphrS(s) {
@@ -137,7 +137,7 @@ func ExampleM3_Transpose() {
 func ExampleSphr_FromCart() {
 	c := &coord.Cart{X: math.Sqrt(3) / 2, Z: 1. / 2}
 	s := new(coord.Sphr).FromCart(c)
-	fmt.Printf("RA:  %3.0f\n", s.Ra*180/math.Pi)
+	fmt.Printf("RA:  %3.0f\n", s.RA*180/math.Pi)
 	fmt.Printf("Dec: %3.0f\n", s.Dec*180/math.Pi)
 	// Output:
 	// RA:    0
@@ -152,7 +152,7 @@ func ExampleSphrS_FromCartS() {
 	}
 	for _, s := range new(coord.SphrS).FromCartS(c) {
 		fmt.Printf("RA %3.0f, Dec %3.0f\n",
-			s.Ra*180/math.Pi, s.Dec*180/math.Pi)
+			s.RA*180/math.Pi, s.Dec*180/math.Pi)
 	}
 	// Output:
 	// RA   0, Dec   0
