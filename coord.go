@@ -1,12 +1,16 @@
 // Public domain.
 
-// Package coord implements 3D cartesian and 2D spherical sky coordinates.
+// Package coord implements 3D cartesian and 2D equatorial coordinates.
 //
 // The method sets are not comprehensive, but include what has been
 // needed for digest2.
 package coord
 
-import "math"
+import (
+	"math"
+
+	"github.com/soniakeys/unit"
+)
 
 const twoPi = 2 * math.Pi
 
@@ -78,26 +82,66 @@ func (z *Cart) Cross(a, b *Cart) *Cart {
 	return z
 }
 
-// Sphr represents spherical sky coordinates.
-//
-// Units can be anything, but methods below work with radians.
+// Equa are equatorial coordinates, referenced to the Earth's rotational axis.
+type Equa struct {
+	RA  unit.RA    // Right ascension (α)
+	Dec unit.Angle // Declination (δ)
+}
+
+// Sphr are general purpose spherical coordinates.
 type Sphr struct {
-	RA, Dec float64
+	Lon unit.Angle
+	Lat unit.Angle
 }
 
 // slice types
 
-type SphrS []Sphr
 type CartS []Cart
+type EquaS []Equa
+type SphrS []Sphr
 
-// FromSphr converts a spherical angle (RA, Dec, in radians) to a
+// FromSphr converts spherical coordinates (Lon, Lat) to a
 // cartesian unit vector (X, Y, Z).  The receiver is returned.
 func (c *Cart) FromSphr(s *Sphr) *Cart {
-	t := math.Cos(s.Dec)
-	c.X = t * math.Cos(s.RA)
-	c.Y = t * math.Sin(s.RA)
-	c.Z = math.Sin(s.Dec)
+	sLon, cLon := s.Lon.Sincos()
+	sLat, cLat := s.Lat.Sincos()
+	c.X = cLat * cLon
+	c.Y = cLat * sLon
+	c.Z = sLat
 	return c
+}
+
+// FromEquaS converts equatorial slice to cartesian slice.
+// Receiver length is adjusted to the length of the parameter.
+// The receiver is returned.
+func (cp *CartS) FromEquaS(e EquaS) CartS {
+	c := *cp
+	if cap(c) < len(e) {
+		c = make(CartS, len(e))
+	} else {
+		c = c[:len(e)]
+	}
+	var s Sphr
+	for i := range e {
+		c[i].FromSphr(s.FromEqua(&e[i]))
+	}
+	*cp = c
+	return c
+}
+
+func (s *Sphr) FromEqua(e *Equa) *Sphr {
+	s.Lon = e.RA.Angle()
+	s.Lat = e.Dec
+	return s
+}
+
+// This is the copying slice type conversion your mother warned you about.
+func (e EquaS) SphrS() SphrS {
+	s := make(SphrS, len(e))
+	for i := range e {
+		s[i].FromEqua(&e[i])
+	}
+	return s
 }
 
 // FromSphrS converts spherical slice to cartesian slice.
@@ -117,11 +161,19 @@ func (cp *CartS) FromSphrS(s SphrS) CartS {
 	return c
 }
 
+// FromCart cartesian vector to equitorial coordinates.
+// The receiver is returned.
+func (s *Equa) FromCart(c *Cart) *Equa {
+	s.RA = unit.RAFromRad(math.Atan2(c.Y, c.X))
+	s.Dec = unit.Angle(math.Asin(c.Z))
+	return s
+}
+
 // FromCart cartesian vector to spherical coordinates.
 // The receiver is returned.
 func (s *Sphr) FromCart(c *Cart) *Sphr {
-	s.RA = math.Mod(math.Atan2(c.Y, c.X)+twoPi, twoPi)
-	s.Dec = math.Asin(c.Z)
+	s.Lon = unit.Angle(math.Atan2(c.Y, c.X))
+	s.Lat = unit.Angle(math.Asin(c.Z))
 	return s
 }
 
