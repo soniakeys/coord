@@ -62,6 +62,16 @@ func ExampleCart_Mult3() {
 	// {X:0 Y:0.866 Z:0.5}
 }
 
+func ExampleCart_Neg() {
+	a := &coord.Cart{0, 1, -2}
+	n := new(coord.Cart).Neg(a)
+	fmt.Printf("%+3v\n", *a)
+	fmt.Printf("%+3v\n", *n)
+	// Output:
+	// {X:  0 Y:  1 Z: -2}
+	// {X: -0 Y: -1 Z:  2}
+}
+
 func ExampleCart_RotateX() {
 	a := &coord.Cart{0, 1, 0}
 	s, c := math.Sincos(30 * math.Pi / 180)
